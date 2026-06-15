@@ -8,31 +8,38 @@
 
 Описание программы:
 Программа позволяет пользователю вести учёт личного или семейного бюджета.
-Пользователь вводит статьи доходов и расходов с суммами.
-Программа рассчитывает итоговые суммы и определяет профицит или дефицит бюджета.
+Программа работает с предустановленными тестовыми данными (не требует ввода с клавиатуры).
 """
 
-def input_items(prompt, count):
+# ========== ТЕСТОВЫЕ ДАННЫЕ (можно менять здесь) ==========
+# Доходы: список кортежей (название, сумма)
+INCOME_ITEMS = [
+    ("Зарплата", 75000.00),
+    ("Фриланс", 15000.00),
+    ("Проценты по вкладам", 3500.50)
+]
+
+# Расходы: список кортежей (название, сумма)
+EXPENSE_ITEMS = [
+    ("Аренда квартиры", 30000.00),
+    ("Продукты питания", 15000.00),
+    ("Транспорт", 5000.00),
+    ("Интернет и связь", 2000.00),
+    ("Развлечения", 5000.00)
+]
+# ===========================================================
+
+def calculate_total(items):
     """
-    Вводит список статей (название и сумма) и возвращает общую сумму и список.
+    Вычисляет общую сумму из списка статей.
     
     Параметры:
-    prompt (str): приглашение для пользователя
-    count (int): количество статей
+    items (list): список кортежей (название, сумма)
     
     Возвращает:
-    tuple: (общая сумма, список статей в виде кортежей (название, сумма))
+    float: общая сумма
     """
-    items = []
-    total = 0.0
-    print(f"\n{prompt}")
-    print("-" * 40)
-    for i in range(1, count + 1):
-        name = input(f"  Статья {i} (название): ")
-        amount = float(input(f"    Сумма для '{name}': "))
-        items.append((name, amount))
-        total += amount
-    return total, items
+    return sum(amount for _, amount in items)
 
 def print_items(title, items):
     """
@@ -47,7 +54,8 @@ def print_items(title, items):
     for name, amount in items:
         print(f"  {name}: {amount:>10.2f} руб.")
     print("-" * 40)
-    print(f"  ИТОГО: {sum(amount for _, amount in items):>10.2f} руб.")
+    total = calculate_total(items)
+    print(f"  ИТОГО: {total:>10.2f} руб.")
 
 def analyze_budget(income_total, expense_total):
     """
@@ -62,9 +70,9 @@ def analyze_budget(income_total, expense_total):
     """
     balance = income_total - expense_total
     if balance > 0:
-        status = "ПРОФИЦИТ бюджета (есть свободные средства)"
+        status = "ПРОФИЦИТ бюджета (есть свободные средства) ✓"
     elif balance < 0:
-        status = "ДЕФИЦИТ бюджета (не хватает средств)"
+        status = "ДЕФИЦИТ бюджета (не хватает средств) ✗"
     else:
         status = "СБАЛАНСИРОВАННЫЙ бюджет (доходы равны расходам)"
     return balance, status
@@ -81,7 +89,7 @@ def get_saving_advice(balance, expense_total, income_total):
     Возвращает:
     str: рекомендация
     """
-    if balance > 0:
+    if balance > 0 and income_total > 0:
         saving_percent = (balance / income_total) * 100
         return f"  Отлично! Вы откладываете {saving_percent:.1f}% дохода."
     elif balance < 0:
@@ -101,56 +109,51 @@ def main():
     print("=" * 50)
     print("    УЧЁТ ДОХОДОВ И РАСХОДОВ БЮДЖЕТА")
     print("=" * 50)
-    print("\nПрограмма поможет вам проанализировать ваш бюджет.")
-    print("Вы можете ввести любое количество статей доходов и расходов.")
     
-    try:
-        # Ввод количества статей
-        n_income = int(input("\nВведите количество статей доходов: "))
-        if n_income <= 0:
-            print("Ошибка: количество статей доходов должно быть положительным.")
-            return
-        
-        n_expense = int(input("Введите количество статей расходов: "))
-        if n_expense <= 0:
-            print("Ошибка: количество статей расходов должно быть положительным.")
-            return
-        
-        # Ввод доходов и расходов
-        income_total, income_items = input_items("ДОХОДЫ:", n_income)
-        expense_total, expense_items = input_items("РАСХОДЫ:", n_expense)
-        
-        # Вывод результатов
-        print("\n" + "=" * 50)
-        print("РЕЗУЛЬТАТЫ АНАЛИЗА БЮДЖЕТА")
-        print("=" * 50)
-        
-        print_items("ДОХОДЫ", income_items)
-        print_items("РАСХОДЫ", expense_items)
-        
-        # Анализ бюджета
-        balance, status = analyze_budget(income_total, expense_total)
-        
-        print("\n" + "-" * 40)
-        print(f"ОСТАТОК БЮДЖЕТА: {balance:>10.2f} руб.")
-        print("-" * 40)
-        
-        print(f"\nЗАКЛЮЧЕНИЕ: {status}")
-        print(f"\n{get_saving_advice(balance, expense_total, income_total)}")
-        
-        # Дополнительный совет
-        if balance < 0:
-            print("\n  Рекомендация: пересмотрите обязательные расходы")
-            print("  и найдите возможности для экономии.")
-        elif balance > 0 and balance < income_total * 0.1:
-            print("\n  Рекомендация: увеличьте норму сбережений до 10-15% дохода.")
-        elif balance > income_total * 0.3:
-            print("\n  Рекомендация: рассмотрите варианты инвестирования свободных средств.")
-        
-    except ValueError:
-        print("\nОшибка: введено некорректное значение. Пожалуйста, введите числа.")
-    except Exception as e:
-        print(f"\nПроизошла ошибка: {e}")
+    # Используем предустановленные тестовые данные
+    income_items = INCOME_ITEMS
+    expense_items = EXPENSE_ITEMS
+    
+    # Расчёт общих сумм
+    income_total = calculate_total(income_items)
+    expense_total = calculate_total(expense_items)
+    
+    print(f"\n📊 Анализ бюджета (всего статей: {len(income_items)} доходов, {len(expense_items)} расходов)")
+    
+    # Вывод результатов
+    print("\n" + "=" * 50)
+    print("РЕЗУЛЬТАТЫ АНАЛИЗА БЮДЖЕТА")
+    print("=" * 50)
+    
+    print_items("📈 ДОХОДЫ", income_items)
+    print_items("📉 РАСХОДЫ", expense_items)
+    
+    # Анализ бюджета
+    balance, status = analyze_budget(income_total, expense_total)
+    
+    print("\n" + "-" * 40)
+    print(f"💰 ОСТАТОК БЮДЖЕТА: {balance:>10.2f} руб.")
+    print("-" * 40)
+    
+    print(f"\n📋 ЗАКЛЮЧЕНИЕ: {status}")
+    print(f"\n💡 РЕКОМЕНДАЦИЯ:")
+    print(f"{get_saving_advice(balance, expense_total, income_total)}")
+    
+    # Дополнительный совет
+    if balance < 0:
+        print("\n  📌 Совет: пересмотрите обязательные расходы")
+        print("     и найдите возможности для экономии.")
+    elif balance > 0 and income_total > 0 and balance < income_total * 0.1:
+        print("\n  📌 Совет: увеличьте норму сбережений до 10-15% дохода.")
+    elif balance > 0 and income_total > 0 and balance > income_total * 0.3:
+        print("\n  📌 Совет: рассмотрите варианты инвестирования свободных средств.")
+    
+    # Финансовые показатели
+    print("\n" + "-" * 40)
+    print("📊 ФИНАНСОВЫЕ ПОКАЗАТЕЛИ:")
+    if income_total > 0:
+        print(f"  Норма сбережения: {(balance/income_total)*100:.1f}%")
+        print(f"  Доля расходов в доходах: {(expense_total/income_total)*100:.1f}%")
     
     print("\n" + "=" * 50)
     print("Благодарим за использование программы!")
